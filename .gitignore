@@ -1,0 +1,13 @@
+# Maven build output (מבוסס על מבנה הפרויקט במטלה)
+target/
+
+# IntelliJ IDEA specific files (קבצי הגדרות של סביבת העבודה)
+.idea/
+*.iml
+
+# Java compiled files
+*.class
+
+# OS generated files
+.DS_Store
+Thumbs.db
