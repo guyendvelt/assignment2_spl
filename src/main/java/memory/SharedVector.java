@@ -10,16 +10,27 @@ public class SharedVector {
 
     public SharedVector(double[] vector, VectorOrientation orientation) {
         // TODO: store vector data and its orientation
+        this.vector = vector;
+        this.orientation = orientation;
     }
 
     public double get(int index) {
         // TODO: return element at index (read-locked)
-        return 0;
+        readLock();
+        try{
+            return vector[index];
+        }finally {
+            readUnlock();
+        }
     }
 
     public int length() {
-        // TODO: return vector length
-        return 0;
+       readLock();
+       try{
+           return vector.length;
+       }finally {
+           readUnlock();
+       }
     }
 
     public VectorOrientation getOrientation() {
