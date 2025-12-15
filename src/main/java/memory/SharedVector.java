@@ -15,7 +15,7 @@ public class SharedVector {
     }
 
     public double get(int index) {
-        // TODO: return element at index (read-locked)
+        // TODO: return element at index (r ead-locked)
         readLock();
         try {
             return vector[index];
