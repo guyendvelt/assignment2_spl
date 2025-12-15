@@ -53,19 +53,17 @@ public class SharedMatrix {
         try {
             double[][] matrix;
             int cols, rows;
-            boolean isRowMajor = this.getOrientation() == VectorOrientation.ROW_MAJOR;
+            boolean isRowMajor = tempVectors[0].getOrientation() == VectorOrientation.ROW_MAJOR;
             if (!isRowMajor) {
                 rows = tempVectors[0].length();
-                cols = this.length();
+                cols = tempVectors.length;
             } else {
-                rows = this.length();
+                rows = tempVectors.length;
                 cols = tempVectors[0].length();
             }
             matrix = new double[rows][cols];
             for (int i = 0; i < tempVectors.length; i++) {
                 SharedVector tempVec = tempVectors[i];
-                tempVec.readLock();
-
                 if (isRowMajor) {
                     for (int j = 0; j < tempVec.length(); j++) {
                         matrix[i][j] = tempVec.get(j);
@@ -86,10 +84,11 @@ public class SharedMatrix {
 
     public SharedVector get(int index) {
         // TODO: return vector at index
-        if(index >= this.length() || index < 0) {
+        SharedVector[] tempVectors = vectors;
+        if(index >= tempVectors.length || index < 0) {
             throw new IllegalArgumentException("index is Illegal");
         }
-            return this.vectors[index];
+            return tempVectors[index];
     }
 
     public int length() {
