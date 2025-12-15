@@ -13,11 +13,18 @@ public class TiredExecutor {
 
     public TiredExecutor(int numThreads) {
         // TODO
-        workers = null; // placeholder
+        if(numThreads =< 0){
+            throw new IllegalArgumentException("numThreads should be bigger than 0")
+        }
+        workers = new TiredThread[numThreads];
+
     }
 
     public void submit(Runnable task) {
         // TODO
+        if(!idleMinHeap.isEmpty()) {
+
+        }
     }
 
     public void submitAll(Iterable<Runnable> tasks) {

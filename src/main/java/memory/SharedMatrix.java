@@ -52,7 +52,7 @@ public class SharedMatrix {
     public double[][] readRowMajor() {
         // TODO: return matrix contents as a row-major double[][]
         SharedVector[] tempVectors = vectors;
-        if (tempVectors == null) {
+        if (tempVectors == null || tempVectors.length == 0){
             return new double[0][0];
         }
         acquireAllVectorReadLocks(tempVectors);
