@@ -92,8 +92,9 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
               idleStartTime.set(System.nanoTime());
               this.busy.set(false);
            } catch (InterruptedException e){
-               System.out.println("Thread " + id + "interrupted");
+               System.err.println("Thread " + id + "interrupted");
                 break;
+
            }
        }
     }

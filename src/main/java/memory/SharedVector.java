@@ -137,61 +137,25 @@ public class SharedVector {
         if (matrix == null) {
             throw new IllegalArgumentException("matrix cannot be null");
         }
+        if (this.getOrientation() == VectorOrientation.COLUMN_MAJOR) {
+            throw new IllegalArgumentException("vector should not be column major");
+        }
+
         double[] result;
         SharedVector tempVector;
-        if (matrix.getOrientation() == VectorOrientation.COLUMN_MAJOR) {
-            if (this.length() != matrix.get(0).length()) {
-                throw new IllegalArgumentException("Dimensions mismatch");
-            }
-            result = new double[matrix.length()];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = this.dot(matrix.get(i));
-            }
-            tempVector = new SharedVector(result, VectorOrientation.ROW_MAJOR);
-
-//        } else {
-//            if (this.length() != matrix.length()) {
-//                throw new IllegalArgumentException("Dimensions mismatch");
-//            }
-//            double[] myVectorData = new double[this.vector.length];
-//            this.readLock();
-//            try {
-//                for (int i = 0; i < this.vector.length; i++) {
-//                    myVectorData[i] = this.vector[i];
-//                }
-//
-//            } finally {
-//                this.readUnlock();
-//            }
-//
-//            int resSize = matrix.get(0).length();
-//            result = new double[resSize];
-//            tempVector = new SharedVector(result, VectorOrientation.ROW_MAJOR);
-//            for (int i = 0; i < this.length(); i++) {
-//                double scalar = myVectorData[i];
-//                SharedVector currRowVec = matrix.get(i);
-//                double[] tempRowArr = new double[result.length];
-//                currRowVec.readLock();
-//                try{
-//                    for (int j = 0; j < tempRowArr.length; j++) {
-//                        tempRowArr[j] = currRowVec.vector[j] * scalar;
-//                    }
-//                }finally {
-//                    currRowVec.readUnlock();
-//                }
-//
-//                SharedVector tempRowVec = new SharedVector(tempRowArr, VectorOrientation.ROW_MAJOR);
-//                tempVector.add(tempRowVec);
-//            }
-//        }
-            writeLock();
-            try {
-                this.vector = tempVector.vector;
-            } finally {
-                writeUnlock();
-            }
-
+        if (this.length() != matrix.get(0).length()) {
+            throw new IllegalArgumentException("Dimensions mismatch");
+        }
+        result = new double[matrix.length()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = this.dot(matrix.get(i));
+        }
+        tempVector = new SharedVector(result, VectorOrientation.ROW_MAJOR);
+        writeLock();
+        try {
+            this.vector = tempVector.vector;
+        } finally {
+            writeUnlock();
         }
     }
-
 }
