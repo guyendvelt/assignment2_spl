@@ -64,7 +64,7 @@ public class SharedVector {
         this.lock.readLock().unlock();
     }
 
-    public void transpose() {
+    public void transpose(){
         // TODO: transpose vector
         writeLock();
         try {
@@ -134,13 +134,13 @@ public class SharedVector {
 
     public void vecMatMul(SharedMatrix matrix) {
         // TODO: compute row-vector × matrix
+        //we assume that matrix is column major oriented
         if (matrix == null) {
             throw new IllegalArgumentException("matrix cannot be null");
         }
         if (this.getOrientation() == VectorOrientation.COLUMN_MAJOR) {
             throw new IllegalArgumentException("vector should not be column major");
         }
-
         double[] result;
         SharedVector tempVector;
         if (this.length() != matrix.get(0).length()) {

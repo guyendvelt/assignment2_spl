@@ -94,7 +94,6 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
            } catch (InterruptedException e){
                System.err.println("Thread " + id + "interrupted");
                 break;
-
            }
        }
     }

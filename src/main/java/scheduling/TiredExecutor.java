@@ -42,7 +42,6 @@ public class TiredExecutor {
                     }
                 }
             };
-
             currThread.newTask(wrappedTask);
         } catch (InterruptedException e) {
             inFlight.decrementAndGet();
@@ -89,8 +88,6 @@ public class TiredExecutor {
 
             long timeUsedMs = worker.getTimeUsed() / 1_000_000;
             long idleMs = worker.getTimeIdle() / 1_000_000;
-
-            // שרשור ידני במקום format
             sb.append("Worker #").append(worker.getWorkerId())
                     .append(" | Fatigue: ").append(fatigue)
                     .append(" | Work Time: ").append(timeUsedMs).append(" ms")
