@@ -20,30 +20,68 @@ public class LinearAlgebraEngine {
 
     public ComputationNode run(ComputationNode computationRoot) {
         // TODO: resolve computation tree step by step until final matrix is produced\
+        if (computationRoot == null) {
+            throw new IllegalArgumentException("computation root should not be null");
+        }
         ComputationNode res;
         if (computationRoot.getNodeType() == ComputationNodeType.MATRIX) {
-            res = new ComputationNode(computationRoot.getMatrix());
-            return res;
-
-        } else if (computationRoot.getNodeType() == ComputationNodeType.NEGATE) {
-            if (computationRoot.getChildren().size() != 1) {
-                throw new ArithmeticException("Negate is an Unary function");
+            return computationRoot;
+        } else {
+            List<ComputationNode> tempChildrenList = computationRoot.getChildren();
+            List<ComputationNode> resolvedChildrenList = new ArrayList<>();
+            if(tempChildrenList == null){
+                throw new IllegalArgumentException("can't apply operation, node should have children");
             }
-            ComputationNode recursiveNode = run(computationRoot.getChildren().get(0));
-            createNegateTasks()
-            double[][] currMatrix = recursiveNode.getMatrix();
-            SharedMatrix tempMatrix = new SharedMatrix(currMatrix);
-            for (int i = 0; i < currMatrix.length; i++) {
-                tempMatrix.get(i).negate();
+            for(ComputationNode child : tempChildrenList){
+                ComputationNode temp = run(child);
+                resolvedChildrenList.add(temp);
             }
-            currMatrix = tempMatrix.readRowMajor();
-            return run(new ComputationNode(currMatrix));
+            res = new ComputationNode(computationRoot.getNodeType(), resolvedChildrenList);
+            loadAndCompute(res);
+            return new ComputationNode(leftMatrix.readRowMajor());
         }
     }
 
     public void loadAndCompute(ComputationNode node) {
         // TODO: load operand matrices
         // TODO: create compute tasks & submit tasks to executor
+
+        //load operand matrix :
+        if(node.getChildren() == null) {
+            throw new IllegalArgumentException("can't compute, node have no children");
+        }
+        ComputationNode left;
+        ComputationNode right;
+        ComputationNodeType type = node.getNodeType();
+        if(type == ComputationNodeType.ADD){
+            if(node.getChildren().size() < 2){
+                throw new IllegalArgumentException("can't add, node have less than 2 children");
+            }
+            left = node.getChildren().get(0);
+            leftMatrix.loadColumnMajor(left.getMatrix());
+            right = node.getChildren().get(1);
+            rightMatrix.loadColumnMajor(right.getMatrix());
+            executor.submitAll(createAddTasks());
+        }else if(type == ComputationNodeType.MULTIPLY){
+            if(node.getChildren().size() < 2){
+                throw new IllegalArgumentException("can't multiply, node have less than 2 children");
+            }
+            left = node.getChildren().get(0);
+            leftMatrix.loadRowMajor(left.getMatrix());
+            right = node.getChildren().get(1);
+            rightMatrix.loadColumnMajor(right.getMatrix());
+            executor.submitAll(createMultiplyTasks());
+        }else if(type == ComputationNodeType.NEGATE){
+            left = node.getChildren().get(0);
+            leftMatrix.loadColumnMajor(left.getMatrix());
+            executor.submitAll(createNegateTasks());
+
+        }else if(type == ComputationNodeType.TRANSPOSE){
+            left = node.getChildren().get(0);
+            leftMatrix.loadColumnMajor(left.getMatrix());
+            executor.submitAll(createTransposeTasks());
+        }
+
     }
 
     public List<Runnable> createAddTasks() {
@@ -132,7 +170,7 @@ public class LinearAlgebraEngine {
 
     public String getWorkerReport() {
         // TODO: return summary of worker activity
-        return null;
+        return executor.getWorkerReport();
     }
 
     private boolean canAdd() {

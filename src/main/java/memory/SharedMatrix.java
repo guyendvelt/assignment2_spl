@@ -36,17 +36,22 @@ public class SharedMatrix {
         if (matrix == null) {
             throw new IllegalArgumentException("Matrix cannot be null");
         }
-        SharedVector[] tempVectors = new SharedVector[matrix[0].length];
-        int cols = tempVectors.length;
-        int rows = matrix.length;
-        for (int i = 0; i < cols; i++) {
-            double[] tempCol = new double[rows];
-            for (int j = 0; j < rows; j++) {
-                tempCol[j] = matrix[j][i];
+        if(matrix.length == 0 || matrix[0].length == 0){
+            this.vectors = new SharedVector[0];
+        } else {
+            SharedVector[] tempVectors = new SharedVector[matrix[0].length];
+            int cols = tempVectors.length;
+            int rows = matrix.length;
+            for (int i = 0; i < cols; i++) {
+                double[] tempCol = new double[rows];
+                for (int j = 0; j < rows; j++) {
+                    tempCol[j] = matrix[j][i];
+                }
+                tempVectors[i] = new SharedVector(tempCol, VectorOrientation.COLUMN_MAJOR);
             }
-            tempVectors[i] = new SharedVector(tempCol, VectorOrientation.COLUMN_MAJOR);
+            vectors = tempVectors;
         }
-        vectors = tempVectors;
+
     }
 
     public double[][] readRowMajor() {
