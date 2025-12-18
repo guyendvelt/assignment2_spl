@@ -27,6 +27,7 @@ public class LinearAlgebraEngine {
         if (computationRoot.getNodeType() == ComputationNodeType.MATRIX) {
             return computationRoot;
         } else {
+            computationRoot.associativeNesting();
             List<ComputationNode> tempChildrenList = computationRoot.getChildren();
             List<ComputationNode> resolvedChildrenList = new ArrayList<>();
             if(tempChildrenList == null){
@@ -200,6 +201,8 @@ public class LinearAlgebraEngine {
             }
         }
     }
+
+
 
 
 }
