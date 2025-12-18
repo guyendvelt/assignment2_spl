@@ -71,7 +71,7 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
     public void shutdown() {
        // TODO
         alive.set(false);
-        handoff.add(POISON_PILL);
+        handoff.offer(POISON_PILL);
 
     }
 

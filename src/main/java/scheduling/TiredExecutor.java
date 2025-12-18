@@ -45,7 +45,8 @@ public class TiredExecutor {
             currThread.newTask(wrappedTask);
         } catch (InterruptedException e) {
             inFlight.decrementAndGet();
-            throw new RuntimeException(e.getMessage());
+//            throw new RuntimeException(e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -59,7 +60,8 @@ public class TiredExecutor {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+//                    throw new RuntimeException(e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }
