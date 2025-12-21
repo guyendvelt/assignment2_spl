@@ -23,24 +23,15 @@ public class LinearAlgebraEngine {
         if (computationRoot == null) {
             throw new IllegalArgumentException("computation root should not be null");
         }
-        ComputationNode res;
-        if (computationRoot.getNodeType() == ComputationNodeType.MATRIX) {
-            return computationRoot;
-        } else {
-            computationRoot.associativeNesting();
-            List<ComputationNode> tempChildrenList = computationRoot.getChildren();
-            List<ComputationNode> resolvedChildrenList = new ArrayList<>();
-            if(tempChildrenList == null){
-                throw new IllegalArgumentException("can't apply operation, node should have children");
+        prepareTree(computationRoot);
+        while (computationRoot.getNodeType() != ComputationNodeType.MATRIX) {
+            ComputationNode resolvableNode = computationRoot.findResolvable();
+            if(resolvableNode == null){
+                throw new IllegalArgumentException("Tree Structure Error : no resolvable node");
             }
-            for(ComputationNode child : tempChildrenList){
-                ComputationNode temp = run(child);
-                resolvedChildrenList.add(temp);
-            }
-            res = new ComputationNode(computationRoot.getNodeType(), resolvedChildrenList);
-            loadAndCompute(res);
-            return new ComputationNode(leftMatrix.readRowMajor());
+            loadAndCompute(resolvableNode);
         }
+        return computationRoot;
     }
 
     public void loadAndCompute(ComputationNode node) {
@@ -76,13 +67,12 @@ public class LinearAlgebraEngine {
             left = node.getChildren().get(0);
             leftMatrix.loadColumnMajor(left.getMatrix());
             executor.submitAll(createNegateTasks());
-
         }else if(type == ComputationNodeType.TRANSPOSE){
             left = node.getChildren().get(0);
             leftMatrix.loadColumnMajor(left.getMatrix());
             executor.submitAll(createTransposeTasks());
         }
-
+        node.resolve(leftMatrix.readRowMajor());
     }
 
     public List<Runnable> createAddTasks() {
@@ -198,6 +188,17 @@ public class LinearAlgebraEngine {
                 return leftMatrix.get(0).length() == rightMatrix.get(0).length();
             } else {
                 return leftMatrix.length() == rightMatrix.length();
+            }
+        }
+    }
+
+    private void prepareTree(ComputationNode node){
+        if(node.getNodeType() != ComputationNodeType.MATRIX){
+            node.associativeNesting();
+            if(node.getChildren()!=null){
+                for(ComputationNode child : node.getChildren()){
+                    child.associativeNesting();
+                }
             }
         }
     }
