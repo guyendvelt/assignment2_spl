@@ -23,11 +23,11 @@ public class LinearAlgebraEngine {
         if (computationRoot == null) {
             throw new IllegalArgumentException("computation root should not be null");
         }
-        prepareTree(computationRoot);
+        computationRoot.associativeNesting();
         while (computationRoot.getNodeType() != ComputationNodeType.MATRIX) {
             ComputationNode resolvableNode = computationRoot.findResolvable();
             if(resolvableNode == null){
-                throw new IllegalArgumentException("Tree Structure Error : no resolvable node");
+                throw new IllegalArgumentException("Tree Structure Error: no resolvable node");
             }
             loadAndCompute(resolvableNode);
         }
@@ -39,12 +39,16 @@ public class LinearAlgebraEngine {
         // TODO: create compute tasks & submit tasks to executor
 
         //load operand matrix :
+        if(node.getNodeType() == ComputationNodeType.MATRIX){
+            throw new IllegalArgumentException("can't load and compute a Matrix");
+        }
         if(node.getChildren() == null) {
             throw new IllegalArgumentException("can't compute, node have no children");
         }
         ComputationNode left;
         ComputationNode right;
         ComputationNodeType type = node.getNodeType();
+        List<Runnable> tasks = null;
         if(type == ComputationNodeType.ADD){
             if(node.getChildren().size() < 2){
                 throw new IllegalArgumentException("can't add, node have less than 2 children");
@@ -53,7 +57,7 @@ public class LinearAlgebraEngine {
             leftMatrix.loadColumnMajor(left.getMatrix());
             right = node.getChildren().get(1);
             rightMatrix.loadColumnMajor(right.getMatrix());
-            executor.submitAll(createAddTasks());
+            tasks = createAddTasks();
         }else if(type == ComputationNodeType.MULTIPLY){
             if(node.getChildren().size() < 2){
                 throw new IllegalArgumentException("can't multiply, node have less than 2 children");
@@ -62,16 +66,17 @@ public class LinearAlgebraEngine {
             leftMatrix.loadRowMajor(left.getMatrix());
             right = node.getChildren().get(1);
             rightMatrix.loadColumnMajor(right.getMatrix());
-            executor.submitAll(createMultiplyTasks());
+            tasks = createMultiplyTasks();
         }else if(type == ComputationNodeType.NEGATE){
             left = node.getChildren().get(0);
             leftMatrix.loadColumnMajor(left.getMatrix());
-            executor.submitAll(createNegateTasks());
-        }else if(type == ComputationNodeType.TRANSPOSE){
+            tasks = createNegateTasks();
+        }else{
             left = node.getChildren().get(0);
             leftMatrix.loadColumnMajor(left.getMatrix());
-            executor.submitAll(createTransposeTasks());
+            tasks = createTransposeTasks();
         }
+        executor.submitAll(tasks);
         node.resolve(leftMatrix.readRowMajor());
     }
 
@@ -92,7 +97,7 @@ public class LinearAlgebraEngine {
                 matrixToChange = rightMatrix;
             }
             double[][] temp = matrixToChange.readRowMajor();
-            matrixToChange.loadColumnMajor(temp);
+            matrixToChange.loadRowMajor(temp);
         }
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
@@ -188,17 +193,6 @@ public class LinearAlgebraEngine {
                 return leftMatrix.get(0).length() == rightMatrix.get(0).length();
             } else {
                 return leftMatrix.length() == rightMatrix.length();
-            }
-        }
-    }
-
-    private void prepareTree(ComputationNode node){
-        if(node.getNodeType() != ComputationNodeType.MATRIX){
-            node.associativeNesting();
-            if(node.getChildren()!=null){
-                for(ComputationNode child : node.getChildren()){
-                    child.associativeNesting();
-                }
             }
         }
     }
