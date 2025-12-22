@@ -69,11 +69,7 @@ public class SharedVector {
         writeLock();
         try {
             VectorOrientation curr = this.orientation;
-            if (curr == VectorOrientation.ROW_MAJOR) {
-                this.orientation = VectorOrientation.COLUMN_MAJOR;
-            } else {
-                this.orientation = VectorOrientation.ROW_MAJOR;
-            }
+            this.orientation = curr == VectorOrientation.COLUMN_MAJOR ? VectorOrientation.ROW_MAJOR : VectorOrientation.COLUMN_MAJOR;
         } finally {
             writeUnlock();
         }
@@ -118,7 +114,8 @@ public class SharedVector {
         try {
             if (this.vector.length != other.vector.length) {
                 throw new IllegalArgumentException("Vectors' lengths does not match");
-            } else if (this.orientation == other.orientation) {
+            }
+            if (this.orientation == other.orientation || this.orientation != VectorOrientation.ROW_MAJOR) {
                 throw new IllegalArgumentException("Orientations does not match");
             }
             for (int i = 0; i < this.vector.length; i++) {
@@ -134,7 +131,7 @@ public class SharedVector {
 
     public void vecMatMul(SharedMatrix matrix) {
         // TODO: compute row-vector × matrix
-        //we assume that matrix is column major oriented
+        //we assume that this.vector is row major oriented and matrix is column major oriented
         if (matrix == null) {
             throw new IllegalArgumentException("matrix cannot be null");
         }

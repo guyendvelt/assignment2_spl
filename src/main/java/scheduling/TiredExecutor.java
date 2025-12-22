@@ -17,8 +17,8 @@ public class TiredExecutor {
             throw new IllegalArgumentException("numThreads should be bigger than 0");
         }
         workers = new TiredThread[numThreads];
-        double factor = 0.5 + Math.random();
         for (int i = 0; i < numThreads; i++) {
+            double factor = 0.5 + Math.random();
             workers[i] = new TiredThread(i, factor);
             workers[i].start();
             idleMinHeap.add(workers[i]);
@@ -27,26 +27,38 @@ public class TiredExecutor {
 
     public void submit(Runnable task) {
         // TODO
+        if(task == null){
+            throw new IllegalArgumentException("Task can't be null");
+        }
+        TiredThread currThread;
+        try{
+            currThread = idleMinHeap.take();
+        }catch(InterruptedException e){
+                Thread.currentThread().interrupt();
+                return;
+        }
         inFlight.incrementAndGet();
         try {
-            TiredThread currThread = idleMinHeap.take();
             Runnable wrappedTask = () -> {
                 try {
                     task.run();
                 } finally {
-                    idleMinHeap.offer(currThread);
-                    if (inFlight.decrementAndGet() == 0) {
-                        synchronized (this) {
+                    synchronized (this){
+                        idleMinHeap.add(currThread);
+                        if(inFlight.decrementAndGet() == 0){
                             this.notifyAll();
                         }
                     }
                 }
             };
             currThread.newTask(wrappedTask);
-        } catch (InterruptedException e) {
-            inFlight.decrementAndGet();
-//            throw new RuntimeException(e.getMessage());
-            Thread.currentThread().interrupt();
+        } catch (IllegalStateException e){
+            synchronized (this){
+                inFlight.decrementAndGet();
+                idleMinHeap.add(currThread);
+                this.notifyAll();
+            }
+           throw e;
         }
     }
 
@@ -60,8 +72,8 @@ public class TiredExecutor {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
-
                     Thread.currentThread().interrupt();
+                    return;
                 }
             }
         }

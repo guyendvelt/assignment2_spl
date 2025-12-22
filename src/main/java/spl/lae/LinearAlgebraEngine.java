@@ -25,10 +25,12 @@ public class LinearAlgebraEngine {
         }
         computationRoot.associativeNesting();
         while (computationRoot.getNodeType() != ComputationNodeType.MATRIX) {
+            System.out.println("finding resolvable node");
             ComputationNode resolvableNode = computationRoot.findResolvable();
             if(resolvableNode == null){
                 throw new IllegalArgumentException("Tree Structure Error: no resolvable node");
             }
+            System.out.println("type:" + resolvableNode.getNodeType());
             loadAndCompute(resolvableNode);
         }
         return computationRoot;
@@ -48,7 +50,7 @@ public class LinearAlgebraEngine {
         ComputationNode left;
         ComputationNode right;
         ComputationNodeType type = node.getNodeType();
-        List<Runnable> tasks = null;
+        List<Runnable> tasks;
         if(type == ComputationNodeType.ADD){
             if(node.getChildren().size() < 2){
                 throw new IllegalArgumentException("can't add, node have less than 2 children");
@@ -86,19 +88,24 @@ public class LinearAlgebraEngine {
             throw new IllegalArgumentException("can't add empty Matrix");
         }
         List<Runnable> tasks = new ArrayList<>();
-        if (!canAdd()) {
-            throw new IllegalArgumentException("can't add matrix with different dimensions");
+        if(leftMatrix.length() != rightMatrix.length()
+                || leftMatrix.get(0).length() != rightMatrix.get(0).length()){
+            throw new IllegalArgumentException("can't add, matrix dimensions mismatch");
         }
-        if (leftMatrix.getOrientation() != rightMatrix.getOrientation()) {
-            SharedMatrix matrixToChange;
-            if (leftMatrix.getOrientation() == VectorOrientation.COLUMN_MAJOR) {
-                matrixToChange = leftMatrix;
-            } else {
-                matrixToChange = rightMatrix;
-            }
-            double[][] temp = matrixToChange.readRowMajor();
-            matrixToChange.loadRowMajor(temp);
-        }
+
+//        if (!canAdd()) {
+//            throw new IllegalArgumentException("can't add matrix with different dimensions");
+//        }
+//        if (leftMatrix.getOrientation() != rightMatrix.getOrientation()) {
+//            SharedMatrix matrixToChange;
+//            if (leftMatrix.getOrientation() == VectorOrientation.COLUMN_MAJOR) {
+//                matrixToChange = leftMatrix;
+//            } else {
+//                matrixToChange = rightMatrix;
+//            }
+//            double[][] temp = matrixToChange.readRowMajor();
+//            matrixToChange.loadRowMajor(temp);
+//        }
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
             tasks.add(() -> {
@@ -113,17 +120,20 @@ public class LinearAlgebraEngine {
         if (leftMatrix == null || rightMatrix == null || leftMatrix.length() == 0 || rightMatrix.length() == 0) {
             throw new IllegalArgumentException("can't multiply empty Matrix");
         }
-        if(!canMultiply()){
-            throw new ArithmeticException("Can't multiply matrix with different dimensions");
+        if(leftMatrix.get(0).length() != rightMatrix.get(0).length()){
+            throw new IllegalArgumentException("can't multiply, matrices of different dimensions");
         }
-        if (leftMatrix.getOrientation() != VectorOrientation.ROW_MAJOR) {
-            double[][] temp = leftMatrix.readRowMajor();
-            leftMatrix.loadRowMajor(temp);
-        }
-        if (rightMatrix.getOrientation() != VectorOrientation.COLUMN_MAJOR) {
-            double[][] temp = rightMatrix.readRowMajor();
-            rightMatrix.loadColumnMajor(temp);
-        }
+//        if(!canMultiply()){
+//            throw new ArithmeticException("Can't multiply matrix with different dimensions");
+//        }
+//        if (leftMatrix.getOrientation() != VectorOrientation.ROW_MAJOR) {
+//            double[][] temp = leftMatrix.readRowMajor();
+//            leftMatrix.loadRowMajor(temp);
+//        }
+//        if (rightMatrix.getOrientation() != VectorOrientation.COLUMN_MAJOR) {
+//            double[][] temp = rightMatrix.readRowMajor();
+//            rightMatrix.loadColumnMajor(temp);
+//        }
         List<Runnable> tasks = new ArrayList<>();
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
@@ -195,6 +205,16 @@ public class LinearAlgebraEngine {
                 return leftMatrix.length() == rightMatrix.length();
             }
         }
+    }
+
+    public void shutdown() throws InterruptedException {
+        try {
+            executor.shutdown();
+        }
+        catch (InterruptedException e) {
+            throw new InterruptedException("Executor shutdown interrupted: " + e.getMessage());
+        }
+
     }
 
 
