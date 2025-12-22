@@ -60,7 +60,7 @@ public class TiredExecutor {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
+
                     Thread.currentThread().interrupt();
                 }
             }

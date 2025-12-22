@@ -57,10 +57,9 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
      */
     public void newTask(Runnable task) {
        // TODO
-        if(isBusy()){
-            throw new IllegalStateException("worker is busy");
+        if(!busy.compareAndSet(false,true)){
+            throw new IllegalArgumentException("worker is busy");
         }
-        busy.set(true);
         handoff.add(task);
     }
 
@@ -70,8 +69,10 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
      */
     public void shutdown() {
        // TODO
-        alive.set(false);
-        handoff.offer(POISON_PILL);
+        if(alive.compareAndSet(true,false)){
+            handoff.offer(POISON_PILL);
+        }
+
 
     }
 
