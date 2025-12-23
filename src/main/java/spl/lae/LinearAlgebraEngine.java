@@ -25,12 +25,10 @@ public class LinearAlgebraEngine {
         }
         computationRoot.associativeNesting();
         while (computationRoot.getNodeType() != ComputationNodeType.MATRIX) {
-            System.out.println("finding resolvable node");
             ComputationNode resolvableNode = computationRoot.findResolvable();
             if(resolvableNode == null){
                 throw new IllegalArgumentException("Tree Structure Error: no resolvable node");
             }
-            System.out.println("type:" + resolvableNode.getNodeType());
             loadAndCompute(resolvableNode);
         }
         return computationRoot;
@@ -56,9 +54,9 @@ public class LinearAlgebraEngine {
                 throw new IllegalArgumentException("can't add, node have less than 2 children");
             }
             left = node.getChildren().get(0);
-            leftMatrix.loadColumnMajor(left.getMatrix());
+            leftMatrix.loadRowMajor(left.getMatrix());
             right = node.getChildren().get(1);
-            rightMatrix.loadColumnMajor(right.getMatrix());
+            rightMatrix.loadRowMajor(right.getMatrix());
             tasks = createAddTasks();
         }else if(type == ComputationNodeType.MULTIPLY){
             if(node.getChildren().size() < 2){
@@ -71,11 +69,12 @@ public class LinearAlgebraEngine {
             tasks = createMultiplyTasks();
         }else if(type == ComputationNodeType.NEGATE){
             left = node.getChildren().get(0);
-            leftMatrix.loadColumnMajor(left.getMatrix());
+            leftMatrix.loadRowMajor(left.getMatrix());
             tasks = createNegateTasks();
         }else{
+            //type = transpose :
             left = node.getChildren().get(0);
-            leftMatrix.loadColumnMajor(left.getMatrix());
+            leftMatrix.loadRowMajor(left.getMatrix());
             tasks = createTransposeTasks();
         }
         executor.submitAll(tasks);
