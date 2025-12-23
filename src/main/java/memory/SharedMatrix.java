@@ -1,5 +1,7 @@
 package memory;
 
+import com.fasterxml.jackson.core.io.UTF8Writer;
+
 public class SharedMatrix {
 
     private volatile SharedVector[] vectors = {}; // underlying vectors
@@ -142,4 +144,5 @@ public class SharedMatrix {
             v.writeUnlock();
         }
     }
+
 }
