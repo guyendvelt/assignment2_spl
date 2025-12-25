@@ -1,28 +1,36 @@
 package spl.lae;
 import java.io.IOException;
-import java.text.ParseException;
 
 import parser.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+        String[] invalidTests= new String[]{
+            "test_invalid_dimension_add.json",
+            "test_invalid_dimension_multiply.json",
+            "test_invalid_row_sizes.json",
+            "test_invalid_operator.json",
+            "test_invalid_missing_operand.json",
+            "test_invalid_empty_array.json",
+        };
         // TODO: main
         LinearAlgebraEngine LAE=new LinearAlgebraEngine(10);
         InputParser inputParser=new InputParser();
-        try {
-            ComputationNode root=inputParser.parse("example.json");
+       
+        try{
+            ComputationNode root=inputParser.parse(invalidTests[5]);
             LAE.run(root);
             OutputWriter.write(root.getMatrix(), "My_out.json");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }finally {
+        }catch (Exception e) {
+            OutputWriter.write(e.getMessage(), "My_out.json");
+        }finally{
             try {
                 LAE.shutdown();
-            }
-            catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
+       
 
     }
 }
