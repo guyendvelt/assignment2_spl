@@ -436,6 +436,7 @@ class TestTiredExecutor {
                 executor.submitAll(tasks);
             } catch (Exception e) {
                 // Some exceptions might propagate
+                System.out.println(e.getMessage());
             }
             
             // At least some tasks should have completed successfully

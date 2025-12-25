@@ -100,6 +100,8 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } catch(RuntimeException e){
+                System.out.println("Runtime Exception caught " + e.getMessage());
             }
         }
     }

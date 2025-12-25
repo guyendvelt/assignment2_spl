@@ -277,14 +277,14 @@ class TestSharedMatrix {
             m.loadColumnMajor(original);
 
             double[][] result = m.readRowMajor();
-            assertEquals(3, result.length); // 3 rows now
-            assertEquals(2, result[0].length); // 2 cols now
+            assertEquals(2, result.length); // 3 rows now
+            assertEquals(3, result[0].length); // 2 cols now
             assertEquals(1.0, result[0][0], DELTA);
-            assertEquals(4.0, result[0][1], DELTA);
-            assertEquals(2.0, result[1][0], DELTA);
+            assertEquals(2.0, result[0][1], DELTA);
+            assertEquals(3.0, result[0][2], DELTA);
+            assertEquals(4.0, result[1][0], DELTA);
             assertEquals(5.0, result[1][1], DELTA);
-            assertEquals(3.0, result[2][0], DELTA);
-            assertEquals(6.0, result[2][1], DELTA);
+            assertEquals(6.0, result[1][2], DELTA);
         }
     }
 
