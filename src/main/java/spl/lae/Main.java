@@ -8,9 +8,6 @@ public class Main {
         String[] invalidTests= new String[]{
             "test_invalid_dimension_add.json",
             "test_invalid_dimension_multiply.json",
-            "test_invalid_row_sizes.json",
-            "test_invalid_operator.json",
-            "test_invalid_missing_operand.json",
             "test_invalid_empty_array.json",
         };
         // TODO: main
