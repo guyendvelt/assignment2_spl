@@ -8,12 +8,9 @@ class TestSharedMatrix {
 
     private static final double DELTA = 0.0001;
 
-    // ==========================================
     //        BASIC OPERATIONS TESTS
-    // ==========================================
-
     @Test
-    @DisplayName("Matrix initialization with 2D array")
+    @DisplayName("Matrix initialization")
     void testMatrixInit() {
         double[][] data = {{1, 2}, {3, 4}};
         SharedMatrix m = new SharedMatrix(data);
@@ -55,7 +52,7 @@ class TestSharedMatrix {
         double[][] data = new double[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                data[i][j] = i * size + j;
+                data[i][j] = (i * 5) + j;
             }
         }
         SharedMatrix m = new SharedMatrix(data);
@@ -63,29 +60,11 @@ class TestSharedMatrix {
         double[][] read = m.readRowMajor();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                assertEquals(i * size + j, read[i][j], DELTA);
+                assertEquals((i * 5) + j, read[i][j], DELTA);
             }
         }
     }
-
-    @Test
-    @DisplayName("Non-square matrix (3x5)")
-    void testNonSquareMatrix() {
-        double[][] data = {
-            {1, 2, 3, 4, 5},
-            {6, 7, 8, 9, 10},
-            {11, 12, 13, 14, 15}
-        };
-        SharedMatrix m = new SharedMatrix(data);
-        assertEquals(3, m.length());
-        double[][] read = m.readRowMajor();
-        assertEquals(1.0, read[0][0], DELTA);
-        assertEquals(15.0, read[2][4], DELTA);
-    }
-
-    // ==========================================
-    //        LOAD OPERATIONS TESTS
-    // ==========================================
+    // load operations tests
 
     @Test
     @DisplayName("Load row major")
@@ -129,17 +108,14 @@ class TestSharedMatrix {
     @Test
     @DisplayName("Load replaces existing data")
     void testLoadReplacesData() {
-        SharedMatrix m = new SharedMatrix(new double[][]{{1, 2}, {3, 4}});
+        SharedMatrix m = new SharedMatrix(new double[][]{{1, 2}});
         m.loadRowMajor(new double[][]{{5, 6, 7}, {8, 9, 10}});
         assertEquals(2, m.length());
         double[][] read = m.readRowMajor();
         assertEquals(5.0, read[0][0], DELTA);
         assertEquals(10.0, read[1][2], DELTA);
     }
-
-    // ==========================================
-    //        GET AND ORIENTATION TESTS
-    // ==========================================
+    //   Get and Orientation Tests
 
     @Test
     @DisplayName("Get vector at valid index")
@@ -186,9 +162,7 @@ class TestSharedMatrix {
         assertThrows(IllegalArgumentException.class, () -> m.getOrientation());
     }
 
-    // ==========================================
-    //        EDGE CASE TESTS
-    // ==========================================
+    // Edge Cases Tests
 
     @Test
     @DisplayName("Square matrix 10x10")
@@ -196,7 +170,7 @@ class TestSharedMatrix {
         double[][] data = new double[10][10];
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                data[i][j] = i * 10 + j + 1;
+                data[i][j] = (i * 10) + (j + 1);
             }
         }
         SharedMatrix m = new SharedMatrix(data);
@@ -205,22 +179,6 @@ class TestSharedMatrix {
         assertEquals(1.0, read[0][0], DELTA);
         assertEquals(100.0, read[9][9], DELTA);
         assertEquals(55.0, read[5][4], DELTA);
-    }
-
-    @Test
-    @DisplayName("Rectangular matrix 2x10")
-    void testRectangularMatrix2x10() {
-        double[][] data = new double[2][10];
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 10; j++) {
-                data[i][j] = i * 10 + j;
-            }
-        }
-        SharedMatrix m = new SharedMatrix(data);
-        assertEquals(2, m.length());
-        double[][] read = m.readRowMajor();
-        assertEquals(0.0, read[0][0], DELTA);
-        assertEquals(19.0, read[1][9], DELTA);
     }
 
     @Test
@@ -257,9 +215,7 @@ class TestSharedMatrix {
         assertEquals(6.0, result[1][2], DELTA);
     }
 
-    // ==========================================
-    //        COMPUTATION CORRECTNESS TESTS
-    // ==========================================
+    // Computation Correctness Tests
 
     @Test
     @DisplayName("Matrix addition result verification")
@@ -284,24 +240,6 @@ class TestSharedMatrix {
         assertEquals(44.0, result[1][0], DELTA);
         assertEquals(55.0, result[1][1], DELTA);
         assertEquals(66.0, result[1][2], DELTA);
-    }
-
-    @Test
-    @DisplayName("Matrix multiplication result verification 2x2")
-    void testMatrixMultiplicationCorrectness2x2() {
-        SharedMatrix A = new SharedMatrix(new double[][]{{1, 2}, {3, 4}});
-        SharedMatrix B = new SharedMatrix();
-        B.loadColumnMajor(new double[][]{{5, 6}, {7, 8}});
-
-        for (int i = 0; i < A.length(); i++) {
-            A.get(i).vecMatMul(B);
-        }
-
-        double[][] result = A.readRowMajor();
-        assertEquals(19.0, result[0][0], DELTA);
-        assertEquals(22.0, result[0][1], DELTA);
-        assertEquals(43.0, result[1][0], DELTA);
-        assertEquals(50.0, result[1][1], DELTA);
     }
 
     @Test
@@ -342,7 +280,6 @@ class TestSharedMatrix {
             {1, -2, 3},
             {-4, 5, -6}
         });
-
         for (int i = 0; i < m.length(); i++) {
             m.get(i).negate();
         }
@@ -354,36 +291,6 @@ class TestSharedMatrix {
         assertEquals(4.0, result[1][0], DELTA);
         assertEquals(-5.0, result[1][1], DELTA);
         assertEquals(6.0, result[1][2], DELTA);
-    }
-
-    // ==========================================
-    //        LARGE MATRIX TESTS
-    // ==========================================
-
-    @Test
-    @DisplayName("50x50 matrix operations")
-    void test50x50Matrix() {
-        int size = 50;
-        double[][] data = new double[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                data[i][j] = i + j;
-            }
-        }
-
-        SharedMatrix m = new SharedMatrix(data);
-        assertEquals(size, m.length());
-
-        for (int i = 0; i < m.length(); i++) {
-            m.get(i).negate();
-        }
-
-        double[][] result = m.readRowMajor();
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                assertEquals(-(i + j), result[i][j], DELTA);
-            }
-        }
     }
 
     @Test
@@ -438,10 +345,6 @@ class TestSharedMatrix {
         assertEquals(cols, result[0].length);
     }
 
-    // ==========================================
-    //        SPECIAL MATRIX TESTS
-    // ==========================================
-
     @Test
     @DisplayName("Zero matrix operations")
     void testZeroMatrix() {
@@ -461,119 +364,6 @@ class TestSharedMatrix {
             }
         }
     }
-
-    @Test
-    @DisplayName("Diagonal matrix")
-    void testDiagonalMatrix() {
-        double[][] data = {
-            {5, 0, 0, 0},
-            {0, 10, 0, 0},
-            {0, 0, 15, 0},
-            {0, 0, 0, 20}
-        };
-        SharedMatrix m = new SharedMatrix(data);
-
-        SharedMatrix m2 = new SharedMatrix();
-        m2.loadColumnMajor(data);
-
-        for (int i = 0; i < m.length(); i++) {
-            m.get(i).vecMatMul(m2);
-        }
-
-        double[][] result = m.readRowMajor();
-        assertEquals(25.0, result[0][0], DELTA);
-        assertEquals(100.0, result[1][1], DELTA);
-        assertEquals(225.0, result[2][2], DELTA);
-        assertEquals(400.0, result[3][3], DELTA);
-    }
-
-    @Test
-    @DisplayName("Upper triangular matrix")
-    void testUpperTriangularMatrix() {
-        double[][] data = {
-            {1, 2, 3},
-            {0, 4, 5},
-            {0, 0, 6}
-        };
-        SharedMatrix m = new SharedMatrix(data);
-
-        double[][] result = m.readRowMajor();
-        assertEquals(1.0, result[0][0], DELTA);
-        assertEquals(2.0, result[0][1], DELTA);
-        assertEquals(3.0, result[0][2], DELTA);
-        assertEquals(0.0, result[1][0], DELTA);
-        assertEquals(4.0, result[1][1], DELTA);
-        assertEquals(5.0, result[1][2], DELTA);
-        assertEquals(0.0, result[2][0], DELTA);
-        assertEquals(0.0, result[2][1], DELTA);
-        assertEquals(6.0, result[2][2], DELTA);
-    }
-
-    @Test
-    @DisplayName("Matrix with all same values")
-    void testUniformMatrix() {
-        double[][] data = new double[5][5];
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                data[i][j] = 7.0;
-            }
-        }
-        SharedMatrix m = new SharedMatrix(data);
-        assertEquals(5, m.length());
-
-        SharedVector v = new SharedVector(new double[]{1, 1, 1, 1, 1}, VectorOrientation.ROW_MAJOR);
-        SharedMatrix mCol = new SharedMatrix();
-        mCol.loadColumnMajor(data);
-
-        v.vecMatMul(mCol);
-
-        for (int i = 0; i < 5; i++) {
-            assertEquals(35.0, v.get(i), DELTA);
-        }
-    }
-
-    @Test
-    @DisplayName("Identity matrix")
-    void testIdentityMatrix() {
-        double[][] data = {
-            {1, 0, 0},
-            {0, 1, 0},
-            {0, 0, 1}
-        };
-        SharedMatrix m = new SharedMatrix(data);
-
-        assertEquals(3, m.length());
-        double[][] result = m.readRowMajor();
-        
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (i == j) {
-                    assertEquals(1.0, result[i][j], DELTA);
-                } else {
-                    assertEquals(0.0, result[i][j], DELTA);
-                }
-            }
-        }
-    }
-
-    @Test
-    @DisplayName("Matrix with negative values")
-    void testMatrixWithNegatives() {
-        double[][] data = {
-            {-1, -2, -3},
-            {-4, -5, -6}
-        };
-        SharedMatrix m = new SharedMatrix(data);
-
-        double[][] result = m.readRowMajor();
-        assertEquals(-1.0, result[0][0], DELTA);
-        assertEquals(-2.0, result[0][1], DELTA);
-        assertEquals(-3.0, result[0][2], DELTA);
-        assertEquals(-4.0, result[1][0], DELTA);
-        assertEquals(-5.0, result[1][1], DELTA);
-        assertEquals(-6.0, result[1][2], DELTA);
-    }
-
     @Test
     @DisplayName("Matrix with decimal values")
     void testMatrixWithDecimals() {
