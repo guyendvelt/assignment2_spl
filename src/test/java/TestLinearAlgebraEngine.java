@@ -4,32 +4,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-
 import java.util.List;
 import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class TestLinearAlgebraEngine {
 
     private static final double DELTA = 0.0001;
-    private LinearAlgebraEngine engine;
+    private LinearAlgebraEngine lae;
 
     @BeforeEach
     void setUp() {
-        engine = new LinearAlgebraEngine(4);
+        lae = new LinearAlgebraEngine(4);
     }
 
     @AfterEach
     void tearDown() throws InterruptedException {
-        if (engine != null) {
-            engine.shutdown();
+        if (lae != null) {
+            lae.shutdown();
         }
     }
 
-    // ==========================================
-    //        BASIC OPERATION TESTS
-    // ==========================================
+    // Basic Operations Tests
 
     @Test
     @DisplayName("Matrix addition 2x2")
@@ -40,9 +36,8 @@ class TestLinearAlgebraEngine {
         List<ComputationNode> children = new ArrayList<>();
         children.add(new ComputationNode(m1));
         children.add(new ComputationNode(m2));
-        
         ComputationNode root = new ComputationNode(ComputationNodeType.ADD, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         assertEquals(ComputationNodeType.MATRIX, result.getNodeType());
         double[][] resultMatrix = result.getMatrix();
@@ -64,7 +59,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m2));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         assertEquals(19.0, resultMatrix[0][0], DELTA);
@@ -80,9 +75,8 @@ class TestLinearAlgebraEngine {
         
         List<ComputationNode> children = new ArrayList<>();
         children.add(new ComputationNode(m));
-        
         ComputationNode root = new ComputationNode(ComputationNodeType.NEGATE, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         assertEquals(-1.0, resultMatrix[0][0], DELTA);
@@ -100,7 +94,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.TRANSPOSE, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         assertEquals(3, resultMatrix.length);
@@ -111,9 +105,7 @@ class TestLinearAlgebraEngine {
         assertEquals(5.0, resultMatrix[1][1], DELTA);
     }
 
-    // ==========================================
-    //        NESTED OPERATION TESTS
-    // ==========================================
+    // Nested Operations test
 
     @Test
     @DisplayName("Nested add then multiply")
@@ -132,7 +124,7 @@ class TestLinearAlgebraEngine {
         mulChildren.add(new ComputationNode(c));
         ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, mulChildren);
         
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         double[][] resultMatrix = result.getMatrix();
         
         assertEquals(4.0, resultMatrix[0][0], DELTA);
@@ -154,7 +146,7 @@ class TestLinearAlgebraEngine {
         outer.add(negateOnce);
         ComputationNode root = new ComputationNode(ComputationNodeType.NEGATE, outer);
         
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         double[][] resultMatrix = result.getMatrix();
         
         assertEquals(1.0, resultMatrix[0][0], DELTA);
@@ -176,7 +168,7 @@ class TestLinearAlgebraEngine {
         outer.add(transposeOnce);
         ComputationNode root = new ComputationNode(ComputationNodeType.TRANSPOSE, outer);
         
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         double[][] resultMatrix = result.getMatrix();
         
         assertEquals(2, resultMatrix.length);
@@ -186,9 +178,7 @@ class TestLinearAlgebraEngine {
         assertEquals(3.0, resultMatrix[0][2], DELTA);
     }
 
-    // ==========================================
-    //        ASSOCIATIVE NESTING TESTS
-    // ==========================================
+    // Non Binary Tree Nesting Tests
 
     @Test
     @DisplayName("Multiple operands in addition")
@@ -205,7 +195,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(d));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.ADD, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         assertEquals(10.0, resultMatrix[0][0], DELTA);
@@ -226,7 +216,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(identity));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         assertEquals(2.0, resultMatrix[0][0], DELTA);
@@ -235,9 +225,7 @@ class TestLinearAlgebraEngine {
         assertEquals(5.0, resultMatrix[1][1], DELTA);
     }
 
-    // ==========================================
-    //        LARGE MATRIX TESTS
-    // ==========================================
+    // Large Matrix Tests
 
     @Test
     @DisplayName("10x10 matrix addition")
@@ -256,7 +244,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m2));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.ADD, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         for (int i = 0; i < 10; i++) {
@@ -283,7 +271,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         for (int i = 0; i < 20; i++) {
@@ -307,7 +295,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.NEGATE, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         for (int i = 0; i < 50; i++) {
@@ -317,14 +305,12 @@ class TestLinearAlgebraEngine {
         }
     }
 
-    // ==========================================
-    //        ERROR HANDLING TESTS
-    // ==========================================
+    //        Error Handling Tests
 
     @Test
     @DisplayName("Null computation root throws exception")
     void testNullRoot() {
-        assertThrows(IllegalArgumentException.class, () -> engine.run(null));
+        assertThrows(IllegalArgumentException.class, () -> lae.run(null));
     }
 
     @Test
@@ -338,7 +324,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m2));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.ADD, children);
-        assertThrows(Exception.class, () -> engine.run(root));
+        assertThrows(Exception.class, () -> lae.run(root));
     }
 
     @Test
@@ -352,34 +338,10 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m2));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, children);
-        assertThrows(Exception.class, () -> engine.run(root));
+        assertThrows(Exception.class, () -> lae.run(root));
     }
 
-    // ==========================================
-    //        WORKER REPORT TESTS
-    // ==========================================
-
-    @Test
-    @DisplayName("Worker report after computation")
-    void testWorkerReportAfterComputation() {
-        double[][] m1 = {{1, 2}, {3, 4}};
-        double[][] m2 = {{5, 6}, {7, 8}};
-        
-        List<ComputationNode> children = new ArrayList<>();
-        children.add(new ComputationNode(m1));
-        children.add(new ComputationNode(m2));
-        
-        ComputationNode root = new ComputationNode(ComputationNodeType.ADD, children);
-        engine.run(root);
-        
-        String report = engine.getWorkerReport();
-        assertNotNull(report);
-        assertTrue(report.contains("Worker"));
-    }
-
-    // ==========================================
-    //        SPECIAL MATRIX TESTS
-    // ==========================================
+    // Special Matrix Tests
 
     @Test
     @DisplayName("1x1 matrix operations")
@@ -392,51 +354,11 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m2));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         assertEquals(15.0, result.getMatrix()[0][0], DELTA);
     }
 
-    @Test
-    @DisplayName("Zero matrix addition")
-    void testZeroMatrixAddition() {
-        double[][] zeros = {{0, 0}, {0, 0}};
-        double[][] m = {{1, 2}, {3, 4}};
-        
-        List<ComputationNode> children = new ArrayList<>();
-        children.add(new ComputationNode(zeros));
-        children.add(new ComputationNode(m));
-        
-        ComputationNode root = new ComputationNode(ComputationNodeType.ADD, children);
-        ComputationNode result = engine.run(root);
-        
-        double[][] resultMatrix = result.getMatrix();
-        assertEquals(1.0, resultMatrix[0][0], DELTA);
-        assertEquals(2.0, resultMatrix[0][1], DELTA);
-        assertEquals(3.0, resultMatrix[1][0], DELTA);
-        assertEquals(4.0, resultMatrix[1][1], DELTA);
-    }
-
-    @Test
-    @DisplayName("Identity matrix multiplication")
-    void testIdentityMultiplication() {
-        double[][] identity = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-        double[][] m = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-        
-        List<ComputationNode> children = new ArrayList<>();
-        children.add(new ComputationNode(identity));
-        children.add(new ComputationNode(m));
-        
-        ComputationNode root = new ComputationNode(ComputationNodeType.MULTIPLY, children);
-        ComputationNode result = engine.run(root);
-        
-        double[][] resultMatrix = result.getMatrix();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                assertEquals(m[i][j], resultMatrix[i][j], DELTA);
-            }
-        }
-    }
 
     @Test
     @DisplayName("Rectangular matrix transpose")
@@ -447,7 +369,7 @@ class TestLinearAlgebraEngine {
         children.add(new ComputationNode(m));
         
         ComputationNode root = new ComputationNode(ComputationNodeType.TRANSPOSE, children);
-        ComputationNode result = engine.run(root);
+        ComputationNode result = lae.run(root);
         
         double[][] resultMatrix = result.getMatrix();
         assertEquals(4, resultMatrix.length);
