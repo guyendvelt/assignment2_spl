@@ -116,7 +116,7 @@ public class TiredExecutor {
         sb.append("-----------------------------------------------\n");
         sb.append("Total Workers: ").append(workers.length).append("\n");
         sb.append("Average Fatigue: ").append(averageFatigue).append("\n");
-        sb.append("Fairness Score (Variance): ").append(sumSquaredDeviations).append("\n");
+        sb.append("Fairness Score (Sum Of Squared Deviations): ").append(sumSquaredDeviations).append("\n");
         sb.append("===============================================\n");
         return sb.toString();
     }

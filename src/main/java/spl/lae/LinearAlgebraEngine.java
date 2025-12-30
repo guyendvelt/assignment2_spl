@@ -3,8 +3,6 @@ package spl.lae;
 import parser.*;
 import memory.*;
 import scheduling.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class LinearAlgebraEngine {
@@ -23,15 +21,22 @@ public class LinearAlgebraEngine {
         if (computationRoot == null) {
             throw new IllegalArgumentException("computation root should not be null");
         }
-        computationRoot.associativeNesting();
-        while (computationRoot.getNodeType() != ComputationNodeType.MATRIX) {
-            ComputationNode resolvableNode = computationRoot.findResolvable();
-            if(resolvableNode == null){
-                throw new IllegalArgumentException("Tree Structure Error: no resolvable node");
+        try {
+            computationRoot.associativeNesting();
+            while (computationRoot.getNodeType() != ComputationNodeType.MATRIX) {
+                ComputationNode resolvableNode = computationRoot.findResolvable();
+                if (resolvableNode == null) {
+                    throw new IllegalArgumentException("Tree Structure Error: no resolvable node");
+                }
+                loadAndCompute(resolvableNode);
             }
-            loadAndCompute(resolvableNode);
+            return computationRoot;
+        }finally {
+            try{
+                executor.shutdown();
+            } catch (InterruptedException e) {
+            }
         }
-        return computationRoot;
     }
 
     public void loadAndCompute(ComputationNode node) {
@@ -86,32 +91,19 @@ public class LinearAlgebraEngine {
         if (leftMatrix == null || rightMatrix == null || leftMatrix.length() == 0 || rightMatrix.length() == 0) {
             throw new IllegalArgumentException("can't add empty Matrix");
         }
-        List<Runnable> tasks = new ArrayList<>();
+        Runnable[] tasks = new Runnable[leftMatrix.length()];
         if(leftMatrix.length() != rightMatrix.length()
                 || leftMatrix.get(0).length() != rightMatrix.get(0).length()){
             throw new IllegalArgumentException("can't add, matrix dimensions mismatch");
         }
 
-//        if (!canAdd()) {
-//            throw new IllegalArgumentException("can't add matrix with different dimensions");
-//        }
-//        if (leftMatrix.getOrientation() != rightMatrix.getOrientation()) {
-//            SharedMatrix matrixToChange;
-//            if (leftMatrix.getOrientation() == VectorOrientation.COLUMN_MAJOR) {
-//                matrixToChange = leftMatrix;
-//            } else {
-//                matrixToChange = rightMatrix;
-//            }
-//            double[][] temp = matrixToChange.readRowMajor();
-//            matrixToChange.loadRowMajor(temp);
-//        }
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
-            tasks.add(() -> {
+            tasks[i] = () -> {
                 leftMatrix.get(row).add(rightMatrix.get(row));
-            });
+            };
         }
-        return tasks;
+        return List.of(tasks);
     }
 
     public List<Runnable> createMultiplyTasks() {
@@ -133,44 +125,44 @@ public class LinearAlgebraEngine {
 //            double[][] temp = rightMatrix.readRowMajor();
 //            rightMatrix.loadColumnMajor(temp);
 //        }
-        List<Runnable> tasks = new ArrayList<>();
+        Runnable[] tasks = new Runnable[leftMatrix.length()];
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
-            tasks.add(() -> {
+            tasks[i] = () -> {
                 leftMatrix.get(row).vecMatMul(rightMatrix);
-            });
+            };
         }
-        return tasks;
+        return List.of(tasks);
     }
 
     public List<Runnable> createNegateTasks() {
         // TODO: return tasks that negate rows
-        List<Runnable> tasks = new ArrayList<>();
+        Runnable[] tasks = new Runnable[leftMatrix.length()];
         if (leftMatrix == null || leftMatrix.length() == 0) {
             throw new IllegalArgumentException("can't negate empty Matrix");
         }
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
-            tasks.add(() -> {
+            tasks[i] = () -> {
                 leftMatrix.get(row).negate();
-            });
+            };
         }
-        return tasks;
+        return List.of(tasks);
     }
 
     public List<Runnable> createTransposeTasks() {
         // TODO: return tasks that transpose rows
-        List<Runnable> tasks = new ArrayList<>();
+        Runnable[] tasks = new Runnable[leftMatrix.length()];
         if (leftMatrix == null || leftMatrix.length() == 0) {
             throw new IllegalArgumentException("can't transpose empty Matrix");
         }
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int row = i;
-            tasks.add(() -> {
+            tasks[i] = () -> {
                 leftMatrix.get(row).transpose();
-            });
+            };
         }
-        return tasks;
+        return List.of(tasks);
     }
 
     public String getWorkerReport() {
@@ -204,16 +196,6 @@ public class LinearAlgebraEngine {
                 return leftMatrix.length() == rightMatrix.length();
             }
         }
-    }
-
-    public void shutdown() throws InterruptedException {
-        try {
-            executor.shutdown();
-        }
-        catch (InterruptedException e) {
-            throw new InterruptedException("Executor shutdown interrupted: " + e.getMessage());
-        }
-
     }
 
 

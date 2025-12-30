@@ -61,7 +61,7 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
         if (!alive.get()) {
             throw new IllegalStateException("Worker is shutting down");
         }
-        if (!handoff.offer(task)) {
+        if (busy.get() || !handoff.offer(task)) {
             throw new IllegalStateException("Worker is not ready to accept a new task");
         }
     }
@@ -73,11 +73,7 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
     public void shutdown() {
         // TODO
         if (alive.compareAndSet(true, false)) {
-            try {
-                handoff.put(POISON_PILL);
-            } catch (InterruptedException e) {
-               Thread.currentThread().interrupt();
-            }
+            handoff.offer(POISON_PILL);
         }
     }
 
@@ -91,6 +87,7 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
                 if (task == POISON_PILL) {
                     break;
                 }
+                this.busy.set(true);
                 long startWorkTime = System.nanoTime();
                 task.run();
                 this.busy.set(false);
@@ -99,13 +96,15 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
                 idleStartTime.set(System.nanoTime());
 
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                alive.set(false);
+                break;
             } catch(RuntimeException e){
                 System.out.println("Runtime Exception caught " + e.getMessage());
-                this.shutdown();
-                throw e;
+                alive.set(false);
+                break;
             }
         }
+             this.shutdown();
     }
 
     @Override

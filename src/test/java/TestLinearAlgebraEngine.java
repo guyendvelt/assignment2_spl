@@ -18,13 +18,6 @@ class TestLinearAlgebraEngine {
         lae = new LinearAlgebraEngine(4);
     }
 
-    @AfterEach
-    void tearDown() throws InterruptedException {
-        if (lae != null) {
-            lae.shutdown();
-        }
-    }
-
     // Basic Operations Tests
 
     @Test
