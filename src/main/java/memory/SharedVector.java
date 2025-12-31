@@ -16,6 +16,7 @@ public class SharedVector {
 
     public double get(int index) {
         // TODO: return element at index (r ead-locked)
+        // We use a read lock so no one can modify the vector while we're reading
         readLock();
         try {
             return vector[index];
@@ -25,6 +26,7 @@ public class SharedVector {
     }
 
     public int length() {
+        // Read lock - prevents other threads from changing the vector while we check its size
         readLock();
         try {
             return vector.length;
@@ -35,6 +37,7 @@ public class SharedVector {
 
     public VectorOrientation getOrientation() {
         // TODO: return vector orientation
+        // Read lock - ensures we see the current orientation (might change during transpose)
         readLock();
         try {
             return orientation;
@@ -45,8 +48,8 @@ public class SharedVector {
 
     public void writeLock() {
         // TODO: acquire write lock
+        // Write lock = exclusive access. Only one thread can hold it, and no readers allowed
         this.lock.writeLock().lock();
-
     }
 
     public void writeUnlock() {
@@ -56,6 +59,7 @@ public class SharedVector {
 
     public void readLock() {
         // TODO: acquire read lock
+        // Read lock = shared access. Multiple readers can hold it, but blocks writers
         this.lock.readLock().lock();
     }
 
@@ -77,6 +81,8 @@ public class SharedVector {
 
     public void add(SharedVector other) {
         // TODO: add two vectors
+        // Write lock on 'this' because we modify it, read lock on 'other' because we only read it
+        // No deadlock here - the engine always locks left operand first, so lock order is consistent
         this.writeLock();
         other.readLock();
         try {
@@ -96,6 +102,7 @@ public class SharedVector {
 
     public void negate() {
         // TODO: negate vector
+        // Write lock - we're modifying the vector, so no one else should read/write during this
         this.writeLock();
         try {
             for (int i = 0; i < vector.length; i++) {
@@ -108,6 +115,7 @@ public class SharedVector {
 
     public double dot(SharedVector other) {
         // TODO: compute dot product (row · column)
+        // Read locks on both vectors - we're only reading, so multiple threads can do this at once
         this.readLock();
         other.readLock();
         double dotRes = 0;
@@ -131,7 +139,8 @@ public class SharedVector {
 
     public void vecMatMul(SharedMatrix matrix) {
         // TODO: compute row-vector × matrix
-        //we assume that this.vector is row major oriented and matrix is column major oriented
+        // Assumes this vector is ROW_MAJOR and matrix is COLUMN_MAJOR
+        // We compute the result first, then use write lock to replace the vector atomically
         if (matrix == null) {
             throw new IllegalArgumentException("matrix cannot be null");
         }
