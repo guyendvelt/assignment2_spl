@@ -91,21 +91,32 @@ public class TiredExecutor {
 
     }
 
+
+
     public synchronized String getWorkerReport() {
-        // TODO: return readable statistics for each worker
         StringBuilder sb = new StringBuilder();
-        sb.append("================ WORKER REPORT ================\n");
+        sb.append("============== WORKER REPORT ==============\n");
+        for (TiredThread worker : workers) {
+            sb.append("Worker #").append(worker.getWorkerId())
+                    .append(" | Fatigue: ").append(worker.getFatigue())
+                    .append(" | Work Time: ")
+                    .append(worker.getTimeUsed() / 1_000_000.0).append(" ms")
+                    .append(" | Idle Time: ")
+                    .append(worker.getTimeIdle() / 1_000_000.0).append(" ms")
+                    .append("\n");
+        }
+        sb.append("------------------------------------------\n");
+        sb.append("Fairness Score (Sum Of Squared Deviations): ")
+                .append(calculateFairness()).append("\n");
+        sb.append("==========================================\n");
+        return sb.toString();
+    }
+
+    private double calculateFairness(){
         double totalFatigue = 0;
         for (TiredThread worker : workers) {
             double fatigue = worker.getFatigue();
             totalFatigue += fatigue;
-
-            long timeUsedMs = worker.getTimeUsed() / 1_000_000;
-            long idleMs = worker.getTimeIdle() / 1_000_000;
-            sb.append("Worker #").append(worker.getWorkerId())
-                    .append(" | Fatigue: ").append(fatigue)
-                    .append(" | Work Time: ").append(timeUsedMs).append(" ms")
-                    .append(" | Idle Time: ").append(idleMs).append(" ms\n");
         }
         double averageFatigue = totalFatigue / workers.length;
         double sumSquaredDeviations = 0;
@@ -113,11 +124,6 @@ public class TiredExecutor {
             double diff = worker.getFatigue() - averageFatigue;
             sumSquaredDeviations += (diff * diff);
         }
-        sb.append("-----------------------------------------------\n");
-        sb.append("Total Workers: ").append(workers.length).append("\n");
-        sb.append("Average Fatigue: ").append(averageFatigue).append("\n");
-        sb.append("Fairness Score (Sum Of Squared Deviations): ").append(sumSquaredDeviations).append("\n");
-        sb.append("===============================================\n");
-        return sb.toString();
+        return sumSquaredDeviations;
     }
 }

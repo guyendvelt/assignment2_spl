@@ -20,7 +20,6 @@ class TestTiredThread {
             }
         }
     }
-
     //Task Execution tests
 
     @Test
@@ -52,7 +51,6 @@ class TestTiredThread {
         assertTrue(thread.getFatigue() > initialFatigue);
 
     }
-
 
     @Test
     @DisplayName("Higher fatigue factor results in higher fatigue")
