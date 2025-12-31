@@ -34,7 +34,7 @@ public class TiredExecutor {
         try{
             currThread = idleMinHeap.take();
         }catch(InterruptedException e){
-                Thread.currentThread().interrupt();
+            System.err.println("[TiredExecutor] Submit interrupted: " + e.getMessage());
                 return;
         }
         inFlight.incrementAndGet();
@@ -72,7 +72,7 @@ public class TiredExecutor {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                    System.err.println("[TiredExecutor] SubmitAll interrupted: " + e.getMessage());
                     return;
                 }
             }

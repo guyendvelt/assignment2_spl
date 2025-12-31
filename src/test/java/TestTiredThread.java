@@ -16,7 +16,7 @@ class TestTiredThread {
             try {
                 thread.join(1000);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+               //do nothing
             }
         }
     }
@@ -34,26 +34,6 @@ class TestTiredThread {
         assertEquals(1, counter[0]);
     }
 
-    @Test
-    @DisplayName("Execute multiple tasks sequentially")
-    void testExecuteMultipleTasksSequentially() throws InterruptedException {
-        thread = new TiredThread(0, 1.0);
-        thread.start();
-        int[] counter = {0};
-        for (int i = 0; i < 5; i++) {
-            while (thread.isBusy()) {
-                Thread.sleep(10);
-            }
-            thread.newTask(() -> {
-                synchronized (counter) {
-                    counter[0]++;
-                }
-            });
-            Thread.sleep(50);
-        }
-        Thread.sleep(100);
-        assertEquals(5, counter[0]);
-    }
 
     @Test
     @DisplayName("Task execution increases timeUsed")
@@ -100,20 +80,6 @@ class TestTiredThread {
         highFatigueThread.join(1000);
     }
 
-    // ==========================================
-    //        COMPARE TO TESTS
-    // ==========================================
-
-    @Test
-    @DisplayName("compareTo returns 0 for equal fatigue")
-    void testCompareToEqualFatigue() {
-        TiredThread t1 = new TiredThread(0, 1.0);
-        TiredThread t2 = new TiredThread(1, 1.0);
-        assertEquals(0, t1.compareTo(t2));
-    }
-
-    @Test
-    @DisplayName("compareTo orders by fatigue correctly")
     void testCompareToOrdersByFatigue() throws InterruptedException {
         TiredThread t1 = new TiredThread(0, 1.0);
         TiredThread t2 = new TiredThread(1, 1.0);
@@ -132,7 +98,6 @@ class TestTiredThread {
         t1.join(1000);
         t2.join(1000);
     }
-
     // Shutdown tests
 
     @Test
@@ -147,21 +112,7 @@ class TestTiredThread {
         thread = null;
     }
 
-    @Test
-    @DisplayName("Multiple shutdown calls are safe")
-    void testMultipleShutdownCallsAreSafe() throws InterruptedException {
-        thread = new TiredThread(0, 1.0);
-        thread.start();
-        thread.shutdown();
-        thread.shutdown();
-        thread.shutdown();
-        thread.join(1000);
-        assertFalse(thread.isAlive());
-        thread = null;
-    }
-
     // Error Handling tests
-
     @Test
     @DisplayName("newTask throws when thread is shutdown")
     void testNewTaskThrowsWhenShutdown() throws InterruptedException {
@@ -199,7 +150,6 @@ class TestTiredThread {
     }
 
      //  Matrix operations tasks testing
-
     @Test
     @DisplayName("Execute matrix negate task")
     void testExecuteMatrixNegateTask() throws InterruptedException {

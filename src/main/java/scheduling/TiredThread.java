@@ -61,7 +61,7 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
         if (!alive.get()) {
             throw new IllegalStateException("Worker is shutting down");
         }
-        if (busy.get() || !handoff.offer(task)) {
+        if (!handoff.offer(task)) {
             throw new IllegalStateException("Worker is not ready to accept a new task");
         }
     }
@@ -73,7 +73,12 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
     public void shutdown() {
         // TODO
         if (alive.compareAndSet(true, false)) {
-            handoff.offer(POISON_PILL);
+            try{
+                handoff.put(POISON_PILL);
+            } catch (InterruptedException e) {
+                System.out.println("InterruptedException caught " + e.getMessage());;
+            }
+
         }
     }
 
@@ -104,7 +109,6 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
                 break;
             }
         }
-             this.shutdown();
     }
 
     @Override

@@ -181,7 +181,7 @@ class TestTiredExecutor {
     //Fairness Tests
 
     private double extractFairnessScore(String report) {
-        String marker = "Fairness Score (Variance): ";
+        String marker = "Fairness Score (Sum Of Squared Deviations): ";
         int start = report.indexOf(marker);
         if (start == -1) return -1;
         start += marker.length();
